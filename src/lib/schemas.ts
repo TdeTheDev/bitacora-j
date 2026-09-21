@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-export const conceptoSchema = z.object({
+export const imagenSchema = z.object({
   id: z.string(),
-  descripcion: z.string().min(1, "La descripcion es requerida"),
-  monto: z.coerce.number().min(0, "El monto no puede ser negativo"),
+  src: z.string(),
+  descripcion: z.string(),
 });
 
 export const bitacoraSchema = z.object({
@@ -18,8 +18,7 @@ export const bitacoraSchema = z.object({
     .number()
     .int("Debe ser un entero")
     .min(0, "No puede ser negativo"),
-  premiosBalance: z.coerce.number().min(0, "El balance no puede ser negativo"),
-  conceptos: z.array(conceptoSchema),
+  imagenes: z.array(imagenSchema),
   observaciones: z.string(),
 });
 

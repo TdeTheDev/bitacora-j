@@ -5,20 +5,11 @@ interface PreviewPanelProps {
 }
 
 const turnoLabel: Record<string, string> = {
-  mananero: "Mananero",
+  mananero: "Mañanero",
   nocturno: "Nocturno",
 };
 
-function fmt(n: unknown) {
-  return Number(n || 0).toFixed(2);
-}
-
 export function PreviewPanel({ data }: PreviewPanelProps) {
-  const totalConceptos = data.conceptos.reduce(
-    (sum: number, c: BitacoraData["conceptos"][number]) => sum + Number(c.monto || 0),
-    0,
-  );
-
   return (
     <div className="flex flex-col gap-6 rounded-[var(--radius-3xl)] border border-ink bg-cream p-6">
       <h2 className="text-[var(--text-heading-sm)] font-medium tracking-display text-ink">
@@ -51,46 +42,42 @@ export function PreviewPanel({ data }: PreviewPanelProps) {
           Datos Operativos
         </h3>
         <div className="flex justify-between border-b border-graphite/20 pb-2 text-[var(--text-body-sm)]">
-          <span className="text-graphite">Total Parlay</span>
+          <span className="text-graphite">Parlays</span>
           <span className="font-medium text-ink">
-            ${fmt(data.parlayTotal)}
+            {Number(data.parlayTotal || 0)}
           </span>
         </div>
         <div className="flex justify-between border-b border-graphite/20 pb-2 text-[var(--text-body-sm)]">
-          <span className="text-graphite">Tickets / Operaciones</span>
+          <span className="text-graphite">Tickets</span>
           <span className="font-medium text-ink">
             {Number(data.ticketsOperaciones || 0)}
           </span>
         </div>
-        <div className="flex justify-between border-b border-graphite/20 pb-2 text-[var(--text-body-sm)]">
-          <span className="text-graphite">Premios / Balance</span>
-          <span className="font-medium text-ink">
-            ${fmt(data.premiosBalance)}
-          </span>
-        </div>
       </div>
 
-      {data.conceptos.length > 0 && (
+      {(data.imagenes || []).length > 0 && (
         <div className="flex flex-col gap-2">
           <h3 className="text-[var(--text-subheading)] font-medium text-ink">
-            Conceptos Adicionales
+            Imagenes ({(data.imagenes || []).length})
           </h3>
-          {data.conceptos.map((c: BitacoraData["conceptos"][number]) => (
-            <div
-              key={c.id}
-              className="flex justify-between border-b border-graphite/20 pb-2 text-[var(--text-body-sm)]"
-            >
-              <span className="text-graphite">{c.descripcion || "—"}</span>
-              <span className="font-medium text-ink">
-                ${fmt(c.monto)}
-              </span>
-            </div>
-          ))}
-          <div className="flex justify-between border-t-2 border-ink pt-2 text-[var(--text-body-sm)]">
-            <span className="font-medium text-ink">Subtotal Conceptos</span>
-            <span className="font-medium text-ink">
-              ${fmt(totalConceptos)}
-            </span>
+          <div className="grid grid-cols-2 gap-3">
+            {(data.imagenes || []).map((img) => (
+              <div
+                key={img.id}
+                className="flex flex-col gap-2 rounded-[var(--radius-xl)] border border-ink p-2"
+              >
+                <img
+                  src={img.src}
+                  alt={img.descripcion || "Imagen"}
+                  className="h-28 w-full rounded object-cover"
+                />
+                {img.descripcion && (
+                  <p className="text-[var(--text-caption)] text-graphite px-1 truncate">
+                    {img.descripcion}
+                  </p>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}

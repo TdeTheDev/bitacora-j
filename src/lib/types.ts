@@ -1,9 +1,9 @@
 export type Turno = "mananero" | "nocturno";
 
-export interface ConceptoDinamico {
+export interface ImagenBitacora {
   id: string;
+  src: string;
   descripcion: string;
-  monto: number;
 }
 
 export interface BitacoraData {
@@ -13,8 +13,7 @@ export interface BitacoraData {
   turno: Turno;
   parlayTotal: number;
   ticketsOperaciones: number;
-  premiosBalance: number;
-  conceptos: ConceptoDinamico[];
+  imagenes: ImagenBitacora[];
   observaciones: string;
 }
 
@@ -25,7 +24,6 @@ export const defaultBitacoraData: BitacoraData = {
   turno: "mananero",
   parlayTotal: 0,
   ticketsOperaciones: 0,
-  premiosBalance: 0,
-  conceptos: [],
+  imagenes: [],
   observaciones: "",
 };

@@ -1,7 +1,7 @@
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback } from "react";
-import { RotateCcw, Plus, Trash2 } from "lucide-react";
+import { useCallback, useRef } from "react";
+import { RotateCcw, Trash2, ImagePlus, Pencil } from "lucide-react";
 import { bitacoraSchema, type BitacoraSchema } from "../lib/schemas";
 import { useBitacoraStore } from "../store/useBitacoraStore";
 import { TurnoSelector } from "./TurnoSelector";
@@ -12,6 +12,7 @@ export function BitacoraForm() {
   const storeData = useBitacoraStore((s) => s.data);
   const setData = useBitacoraStore((s) => s.setData);
   const resetData = useBitacoraStore((s) => s.resetData);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
@@ -28,15 +29,39 @@ export function BitacoraForm() {
   });
 
   const watchedData = watch();
+  const imagenes = watchedData.imagenes || [];
 
   const {
-    fields: conceptoFields,
-    append: appendConcepto,
-    remove: removeConcepto,
+    fields: imagenFields,
+    append: appendImagen,
+    remove: removeImagen,
   } = useFieldArray({
     control,
-    name: "conceptos",
+    name: "imagenes",
   });
+
+  const handleImageUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (!files) return;
+
+      Array.from(files).forEach((file) => {
+        if (!file.type.startsWith("image/")) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          appendImagen({
+            id: crypto.randomUUID(),
+            src: ev.target?.result as string,
+            descripcion: "",
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    },
+    [appendImagen],
+  );
 
   const handleReset = useCallback(() => {
     if (
@@ -51,8 +76,7 @@ export function BitacoraForm() {
         turno: "mananero" as const,
         parlayTotal: 0,
         ticketsOperaciones: 0,
-        premiosBalance: 0,
-        conceptos: [],
+        imagenes: [],
         observaciones: "",
       };
       reset(fresh);
@@ -214,85 +238,51 @@ export function BitacoraForm() {
               </span>
             )}
           </div>
-          
         </div>
+      </div>
 
-        <div className="flex flex-col gap-3">
-          <h4 className="text-[var(--text-body-sm)] font-medium text-ink">
-            Conceptos Adicionales
-          </h4>
-          {conceptoFields.map((field, index) => (
-            <div
-              key={field.id}
-              className="flex flex-col gap-2 rounded-[var(--radius-3xl)] border border-ink p-4 sm:flex-row sm:items-end"
-            >
-              <div className="flex flex-1 flex-col gap-1">
-                <label
-                  htmlFor={`conceptos.${index}.descripcion`}
-                  className="text-[var(--text-caption)] text-graphite font-medium"
-                >
-                  Descripcion
-                </label>
-                <input
-                  id={`conceptos.${index}.descripcion`}
-                  type="text"
-                  {...register(`conceptos.${index}.descripcion`)}
-                  className="rounded-[var(--radius-md)] border border-ink bg-cream px-3 py-2 text-[var(--text-body-sm)] placeholder:text-graphite/50"
-                  placeholder="Concepto..."
-                />
-                {errors.conceptos?.[index]?.descripcion && (
-                  <span className="text-[var(--text-caption)] text-red-600">
-                    {errors.conceptos?.[index]?.descripcion?.message}
-                  </span>
-                )}
-              </div>
-              <div className="flex flex-col gap-1 sm:w-40">
-                <label
-                  htmlFor={`conceptos.${index}.monto`}
-                  className="text-[var(--text-caption)] text-graphite font-medium"
-                >
-                  Monto
-                </label>
-                <input
-                  id={`conceptos.${index}.monto`}
-                  type="number"
-                  step="0.01"
-                  {...register(`conceptos.${index}.monto`)}
-                  className="rounded-[var(--radius-md)] border border-ink bg-cream px-3 py-2 text-[var(--text-body-sm)] placeholder:text-graphite/50"
-                  placeholder="0.00"
-                />
-                {errors.conceptos?.[index]?.monto && (
-                  <span className="text-[var(--text-caption)] text-red-600">
-                    {errors.conceptos?.[index]?.monto?.message}
-                  </span>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => removeConcepto(index)}
-                className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-3xl)] border border-ink text-ink transition-colors hover:bg-sunshine/30 cursor-pointer self-end"
-                aria-label="Eliminar concepto"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-          ))}
+      <div className="flex flex-col gap-3">
+        <h4 className="text-[var(--text-body-sm)] font-medium text-ink">
+          Imagenes
+        </h4>
 
-          <button
-            type="button"
-            onClick={() =>
-              appendConcepto({
-                id: crypto.randomUUID(),
-                descripcion: "",
-                monto: 0,
-              })
-            }
-            className="flex items-center gap-2 self-start rounded-[var(--radius-3xl)] border border-ink px-5 py-2 text-[var(--text-body-sm)] font-medium text-ink transition-colors hover:bg-sunshine/30 cursor-pointer"
-          >
-            <Plus size={16} />
-            Agregar concepto
-          </button>
-        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleImageUpload}
+          className="hidden"
+        />
+
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="flex items-center gap-2 self-start rounded-[var(--radius-3xl)] border border-ink px-5 py-2 text-[var(--text-body-sm)] font-medium text-ink transition-colors hover:bg-sunshine/30 cursor-pointer"
+        >
+          <ImagePlus size={16} />
+          Agregar imagen
+        </button>
+
+        {imagenFields.length > 0 && (
+          <div className="flex flex-col gap-4">
+            {imagenFields.map((field, index) => (
+              <ImagenCard
+                key={field.id}
+                index={index}
+                src={imagenes[index]?.src || ""}
+                descripcion={imagenes[index]?.descripcion || ""}
+                onRemove={() => removeImagen(index)}
+                onEditDescripcion={(desc) =>
+                  setValue(`imagenes.${index}.descripcion`, desc, {
+                    shouldDirty: true,
+                    shouldTouch: true,
+                  })
+                }
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-2">
@@ -324,5 +314,58 @@ export function BitacoraForm() {
         Descargar PDF
       </button>
     </form>
+  );
+}
+
+function ImagenCard({
+  index,
+  src,
+  descripcion,
+  onRemove,
+  onEditDescripcion,
+}: {
+  index: number;
+  src: string;
+  descripcion: string;
+  onRemove: () => void;
+  onEditDescripcion: (desc: string) => void;
+}) {
+  const inputId = `imagen-desc-${index}`;
+
+  return (
+    <div className="flex flex-col gap-3 rounded-[var(--radius-3xl)] border border-ink p-4">
+      <div className="flex items-start gap-3">
+        <img
+          src={src}
+          alt={`Imagen ${index + 1}`}
+          className="h-24 w-24 flex-shrink-0 rounded-[var(--radius-xl)] border border-ink object-cover"
+        />
+        <div className="flex flex-1 flex-col gap-2">
+          <label
+            htmlFor={inputId}
+            className="text-[var(--text-caption)] text-graphite font-medium flex items-center gap-1"
+          >
+            <Pencil size={12} />
+            Descripcion
+          </label>
+          <textarea
+            id={inputId}
+            value={descripcion}
+            onChange={(e) => onEditDescripcion(e.target.value)}
+            rows={2}
+            className="rounded-[var(--radius-md)] border border-ink bg-cream px-3 py-2 text-[var(--text-body-sm)] resize-y"
+            placeholder="Describe la imagen..."
+          />
+        </div>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[var(--radius-3xl)] border border-ink text-ink transition-colors hover:bg-sunshine/30 cursor-pointer"
+          aria-label="Eliminar imagen"
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
+    </div>
   );
 }
