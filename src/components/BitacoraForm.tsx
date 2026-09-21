@@ -6,6 +6,7 @@ import { bitacoraSchema, type BitacoraSchema } from "../lib/schemas";
 import { useBitacoraStore } from "../store/useBitacoraStore";
 import { TurnoSelector } from "./TurnoSelector";
 import { generatePDF } from "../lib/generatePDF";
+import { generateWord } from "../lib/generateWord";
 import { cn } from "../lib/utils";
 
 export function BitacoraForm() {
@@ -301,18 +302,39 @@ export function BitacoraForm() {
         />
       </div>
 
-      <button
-        type="submit"
-        disabled={hasErrors}
-        className={cn(
-          "flex items-center justify-center gap-2 rounded-[var(--radius-3xl)] px-6 py-3 text-[var(--text-body-sm)] font-medium text-ink transition-colors",
-          !hasErrors
-            ? "bg-sunshine hover:bg-sunshine/80 cursor-pointer"
-            : "bg-graphite/20 text-graphite cursor-not-allowed",
-        )}
-      >
-        Descargar PDF
-      </button>
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <button
+          type="submit"
+          disabled={hasErrors}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 rounded-[var(--radius-3xl)] px-6 py-3 text-[var(--text-body-sm)] font-medium text-ink transition-colors",
+            !hasErrors
+              ? "bg-sunshine hover:bg-sunshine/80 cursor-pointer"
+              : "bg-graphite/20 text-graphite cursor-not-allowed",
+          )}
+        >
+          Descargar PDF
+        </button>
+        <button
+          type="button"
+          disabled={hasErrors}
+          onClick={async () => {
+            const valid = await handleSubmit(async (d) => {
+              setData(d);
+              await generateWord(d);
+            })();
+            return valid;
+          }}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 rounded-[var(--radius-3xl)] px-6 py-3 text-[var(--text-body-sm)] font-medium text-ink border border-ink transition-colors",
+            !hasErrors
+              ? "hover:bg-sunshine/30 cursor-pointer"
+              : "bg-graphite/10 text-graphite cursor-not-allowed",
+          )}
+        >
+          Descargar Word
+        </button>
+      </div>
     </form>
   );
 }

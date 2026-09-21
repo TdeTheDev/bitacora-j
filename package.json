@@ -12,6 +12,8 @@
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
     "clsx": "^2.1.1",
+    "docx": "^9.7.1",
+    "file-saver": "^2.0.5",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
     "lucide-react": "^1.47.0",
@@ -24,6 +26,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "@types/file-saver": "^2.0.7",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
@@ -31,6 +34,7 @@
     "oxlint": "^1.81.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
+    "vercel": "^59.23.2",
     "vite": "^8.3.0"
   }
 }
